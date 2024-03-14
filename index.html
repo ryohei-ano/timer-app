@@ -2,53 +2,48 @@
 <html>
 <head>
     <title id="tab-title">タイマーアプリ</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
-        }
-        #timer {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        button {
-            font-size: 16px;
-            padding: 10px 20px;
-            margin: 5px;
-        }
-        #lap-table {
-            margin: 20px auto; /* 中央寄せ */
-            width: 300px; /* 表の幅 */
-            border-collapse: collapse; /* 枠線を重ねる */
-        }
-        #lap-table th, #lap-table td {
-            border: 1px solid #ddd; /* 枠線のスタイル */
-            padding: 8px; /* 枠線とテキストの間隔 */
-        }
-        #lap-table th {
-            background-color: #f2f2f2; /* 見出し行の背景色 */
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <div id="timer">0.00</div>
-    <button id="start">開始</button>
-    <button id="stop">停止</button>
-    <button id="lap">ラップ</button>
-    <button id="reset">リセット</button>
-    <table id="lap-table">
-        <thead>
-            <tr>
-                <th>ラップ</th>
-                <th>秒数</th>
-            </tr>
-        </thead>
-        <tbody id="laps"></tbody>
-    </table>
+<body class="font-sans text-center pt-12">
+    <div id="mode-selection" class="mb-8">
+        <button id="stopwatch-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">ストップウォッチ</button>
+        <button id="countdown-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">タイマー</button>
+    </div>
+
+    <!-- ストップウォッチ機能 -->
+    <div id="stopwatch">
+        <div id="timer" class="text-6xl font-bold mb-4">0.00</div>
+        <button id="start" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">開始</button>
+        <button id="stop" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2">停止</button>
+        <button id="lap" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">ラップ</button>
+        <button id="reset" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">リセット</button>
+        <table id="lap-table" class="table-auto mx-auto mt-8 w-80 border-collapse">
+            <thead>
+                <tr>
+                    <th class="border border-gray-400 px-4 py-2 bg-gray-200">ラップ</th>
+                    <th class="border border-gray-400 px-4 py-2 bg-gray-200">秒数</th>
+                </tr>
+            </thead>
+            <tbody id="laps"></tbody>
+        </table>
+    </div>
+
+    <!-- カウントダウンタイマー機能 -->
+    <div id="countdown" class="hidden">
+        <div id="countdown-timer" class="text-6xl font-bold mb-4 hidden">0:00:00</div>
+        <input type="text" id="hours-input" class="countdown-input border border-gray-400 rounded py-2 px-3 mr-4 w-16 text-center" placeholder="00" maxlength="2" inputmode="numeric">
+        <span class="countdown-label text-xl mr-4">時間</span>
+        <input type="text" id="minutes-input" class="countdown-input border border-gray-400 rounded py-2 px-3 mr-4 w-16 text-center" placeholder="00" maxlength="2" inputmode="numeric">
+        <span class="countdown-label text-xl mr-4">分</span>
+        <input type="text" id="seconds-input" class="countdown-input border border-gray-400 rounded py-2 px-3 mr-4 w-16 text-center" placeholder="00" maxlength="2" inputmode="numeric">
+        <span class="countdown-label text-xl">秒</span>
+        <br class="my-4">
+        <button id="countdown-start" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">開始</button>
+        <button id="countdown-reset" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">リセット</button>
+    </div>
 
     <script>
+        // ストップウォッチ機能のコード
         const timerDisplay = document.getElementById('timer');
         const tabTitle = document.getElementById('tab-title');
         const startButton = document.getElementById('start');
@@ -56,6 +51,7 @@
         const lapButton = document.getElementById('lap');
         const resetButton = document.getElementById('reset');
         const lapsDisplay = document.getElementById('laps');
+        const stopwatchElement = document.getElementById('stopwatch');
 
         let timer;
         let startTime;
@@ -63,19 +59,17 @@
         let isRunning = false;
         let laps = [];
 
-        function updateTimer() {
+        function updateStopwatchTimer() {
             if (isRunning) {
                 const currentTime = new Date().getTime();
                 const elapsedInMillis = currentTime - startTime + elapsedTime;
                 const elapsedInSeconds = elapsedInMillis / 1000;
                 const formattedTime = elapsedInSeconds.toFixed(2);
                 timerDisplay.textContent = formattedTime;
-                tabTitle.textContent = `${formattedTime} 秒 - タイマーアプリ`; // タブタイトルを更新
+                tabTitle.textContent = `${formattedTime} 秒 - タイマーアプリ`;
             }
-            requestAnimationFrame(updateTimer);
+            requestAnimationFrame(updateStopwatchTimer);
         }
-
-        // 以下のコードは変更なし
 
         startButton.addEventListener('click', () => {
             if (!isRunning) {
@@ -84,9 +78,145 @@
             }
         });
 
-        // 省略
+        stopButton.addEventListener('click', () => {
+            if (isRunning) {
+                const currentTime = new Date().getTime();
+                elapsedTime += currentTime - startTime;
+                isRunning = false;
+            }
+        });
 
-        updateTimer();
+        lapButton.addEventListener('click', () => {
+            if (isRunning) {
+                const currentTime = new Date().getTime();
+                const lapTime = (currentTime - startTime + elapsedTime) / 1000;
+                laps.push(lapTime);
+                const lapElement = document.createElement('tr');
+                lapElement.innerHTML = `
+                    <td class="border border-gray-400 px-4 py-2">ラップ ${laps.length}</td>
+                    <td class="border border-gray-400 px-4 py-2">${lapTime.toFixed(2)} 秒</td>
+                `;
+                lapsDisplay.appendChild(lapElement);
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            elapsedTime = 0;
+            timerDisplay.textContent = '0.00';
+            tabTitle.textContent = 'タイマーアプリ';
+            laps = [];
+            lapsDisplay.innerHTML = '';
+            isRunning = false;
+            startTime = null;
+        });
+
+        // カウントダウンタイマー機能のコード
+        const countdownTimerDisplay = document.getElementById('countdown-timer');
+        const hoursInput = document.getElementById('hours-input');
+        const minutesInput = document.getElementById('minutes-input');
+        const secondsInput = document.getElementById('seconds-input');
+        const countdownStartButton = document.getElementById('countdown-start');
+        const countdownResetButton = document.getElementById('countdown-reset');
+        const countdownElement = document.getElementById('countdown');
+
+        let countdownTimer;
+        let countdownTime;
+
+        function formatTime(time) {
+            const hours = Math.floor(time / 3600);
+            const minutes = Math.floor((time % 3600) / 60);
+            const seconds = time % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startCountdown() {
+            const hours = parseInt(hoursInput.value, 10) || 0;
+            const minutes = parseInt(minutesInput.value, 10) || 0;
+            const seconds = parseInt(secondsInput.value, 10) || 0;
+            countdownTime = (hours * 3600) + (minutes * 60) + seconds;
+
+            if (countdownTime <= 0) {
+                alert('無効な時間が入力されました。');
+                return;
+            }
+
+            countdownTimerDisplay.textContent = formatTime(countdownTime);
+            countdownTimerDisplay.classList.remove('hidden');
+
+            countdownTimer = setInterval(() => {
+                countdownTime--;
+                countdownTimerDisplay.textContent = formatTime(countdownTime);
+                tabTitle.textContent = `${formatTime(countdownTime)} - タイマーアプリ`;
+
+                if (countdownTime === 0) {
+                    clearInterval(countdownTimer);
+                    alert('時間切れ!');
+                    tabTitle.textContent = 'タイマーアプリ';
+                }
+            }, 1000);
+        }
+
+        function fillZero(input, targets) {
+            if (input.value !== '') {
+                targets.forEach(target => {
+                    if (target.value === '') {
+                        target.value = '0';
+                    }
+                });
+            }
+        }
+
+        function focusNext(input, next) {
+            if (input.value.length === 2) {
+                next.focus();
+            }
+        }
+
+        hoursInput.addEventListener('input', () => {
+            fillZero(hoursInput, [minutesInput, secondsInput]);
+            focusNext(hoursInput, minutesInput);
+        });
+
+        minutesInput.addEventListener('input', () => {
+            fillZero(minutesInput, [hoursInput, secondsInput]);
+            focusNext(minutesInput, secondsInput);
+        });
+
+        secondsInput.addEventListener('input', () => {
+            fillZero(secondsInput, [hoursInput, minutesInput]);
+        });
+
+        countdownStartButton.addEventListener('click', startCountdown);
+
+        countdownResetButton.addEventListener('click', () => {
+            clearInterval(countdownTimer);
+            countdownTime = null;
+            countdownTimerDisplay.textContent = '0:00:00';
+            countdownTimerDisplay.classList.add('hidden');
+            hoursInput.value = '';
+            minutesInput.value = '';
+            secondsInput.value = '';
+            tabTitle.textContent = 'タイマーアプリ';
+        });
+
+        // モード選択機能
+        const stopwatchButton = document.getElementById('stopwatch-btn');
+        const countdownButton = document.getElementById('countdown-btn');
+
+        stopwatchButton.addEventListener('click', () => {
+            stopwatchElement.classList.remove('hidden');
+            countdownElement.classList.add('hidden');
+            updateStopwatchTimer();
+        });
+
+        countdownButton.addEventListener('click', () => {
+            stopwatchElement.classList.add('hidden');
+            countdownElement.classList.remove('hidden');
+        });
+
+        // 初期表示はストップウォッチ
+        stopwatchElement.classList.remove('hidden');
+        updateStopwatchTimer();
     </script>
 </body>
 </html>
