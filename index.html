@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title id="tab-title">タイマーアプリ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        #timer {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 5px;
+        }
+        #lap-table {
+            margin: 20px auto; /* 中央寄せ */
+            width: 300px; /* 表の幅 */
+            border-collapse: collapse; /* 枠線を重ねる */
+        }
+        #lap-table th, #lap-table td {
+            border: 1px solid #ddd; /* 枠線のスタイル */
+            padding: 8px; /* 枠線とテキストの間隔 */
+        }
+        #lap-table th {
+            background-color: #f2f2f2; /* 見出し行の背景色 */
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">0.00</div>
+    <button id="start">開始</button>
+    <button id="stop">停止</button>
+    <button id="lap">ラップ</button>
+    <button id="reset">リセット</button>
+    <table id="lap-table">
+        <thead>
+            <tr>
+                <th>ラップ</th>
+                <th>秒数</th>
+            </tr>
+        </thead>
+        <tbody id="laps"></tbody>
+    </table>
+
+    <script>
+        const timerDisplay = document.getElementById('timer');
+        const tabTitle = document.getElementById('tab-title');
+        const startButton = document.getElementById('start');
+        const stopButton = document.getElementById('stop');
+        const lapButton = document.getElementById('lap');
+        const resetButton = document.getElementById('reset');
+        const lapsDisplay = document.getElementById('laps');
+
+        let timer;
+        let startTime;
+        let elapsedTime = 0;
+        let isRunning = false;
+        let laps = [];
+
+        function updateTimer() {
+            if (isRunning) {
+                const currentTime = new Date().getTime();
+                const elapsedInMillis = currentTime - startTime + elapsedTime;
+                const elapsedInSeconds = elapsedInMillis / 1000;
+                const formattedTime = elapsedInSeconds.toFixed(2);
+                timerDisplay.textContent = formattedTime;
+                tabTitle.textContent = `${formattedTime} 秒 - タイマーアプリ`; // タブタイトルを更新
+            }
+            requestAnimationFrame(updateTimer);
+        }
+
+        // 以下のコードは変更なし
+
+        startButton.addEventListener('click', () => {
+            if (!isRunning) {
+                startTime = new Date().getTime();
+                isRunning = true;
+            }
+        });
+
+        // 省略
+
+        updateTimer();
+    </script>
+</body>
+</html>
